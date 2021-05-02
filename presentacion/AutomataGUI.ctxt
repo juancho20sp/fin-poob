@@ -1,0 +1,17 @@
+#BlueJ class context
+comment0.target=AutomataGUI
+comment1.params=
+comment1.target=AutomataGUI()
+comment2.params=
+comment2.target=void\ prepareElementos()
+comment3.params=
+comment3.target=void\ prepareAcciones()
+comment4.params=e
+comment4.target=void\ actionPerformed(java.awt.event.ActionEvent)
+comment5.params=
+comment5.target=void\ botonTicTacAccion()
+comment6.params=
+comment6.target=domain.AutomataCelular\ getAutomata()
+comment7.params=args
+comment7.target=void\ main(java.lang.String[])
+numComments=8
