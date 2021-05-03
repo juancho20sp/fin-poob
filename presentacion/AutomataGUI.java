@@ -1,6 +1,7 @@
 package presentacion;
 import domain.*;
 import domain.celulas.Elemento;
+import domain.excepciones.AutomataExcepcion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -168,6 +169,8 @@ public class AutomataGUI extends JFrame{
 
                 } catch (IOException ex){
                     JOptionPane.showMessageDialog(null, ex.getMessage());
+                } catch (ClassNotFoundException ex){
+                    JOptionPane.showMessageDialog(null, ex.getMessage());
                 }
                 break;
             case JFileChooser.ERROR_OPTION:
@@ -220,8 +223,6 @@ public class AutomataGUI extends JFrame{
         switch(selected){
             case JFileChooser.APPROVE_OPTION:
                 File file = chooser.getSelectedFile();
-                //System.out.println("\nEsta lógica está en construcción");
-                //System.out.println("Saving " + file.getName() + " at " +file.getAbsolutePath());
 
                 try {
                     automata.exporte(file);
@@ -257,6 +258,10 @@ public class AutomataGUI extends JFrame{
                     automata = automata.importe(file);
                     repaint();
                 } catch(IOException e){
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                } catch(NumberFormatException e){
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                } catch (AutomataExcepcion e){
                     JOptionPane.showMessageDialog(null, e.getMessage());
                 }
 

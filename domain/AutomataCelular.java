@@ -33,7 +33,36 @@ public class AutomataCelular implements Serializable{
     /**
      * Método para abrir un archivo
      */
-    public AutomataCelular abra(File archivo) throws IOException {
+    public AutomataCelular abra(File archivo) throws IOException, ClassNotFoundException {
+        try{
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(archivo.getAbsolutePath()));
+
+            AutomataCelular au = (AutomataCelular) in.readObject();
+
+            in.close();
+
+            return au;
+        } catch (IOException ex){
+            System.out.println(ex.getMessage());
+            throw new IOException(AutomataExcepcion.IO_ERROR);
+
+        } catch (ClassNotFoundException ex) {
+            throw new ClassNotFoundException(AutomataExcepcion.CLASS_NOT_FOUND);
+        }
+
+    }
+
+    /**
+     * Método para abrir un archivo
+     */
+    public void abra00(File archivo){
+        JOptionPane.showMessageDialog(null, AutomataExcepcion.NOT_AVAILABLE);
+    }
+
+    /**
+     * Método para abrir un archivo
+     */
+    public AutomataCelular abra01(File archivo) throws IOException {
         try{
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(archivo.getAbsolutePath()));
 
@@ -51,16 +80,35 @@ public class AutomataCelular implements Serializable{
     }
 
     /**
-     * Método para abrir un archivo
+     * Método para guardar un archivo
      */
-    public void abra00(File archivo){
+    public void guarde(File archivo) throws IOException{
+        try {
+            // Creamos el stream
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(archivo.getAbsolutePath()));
+
+            // Guardamos el objeto
+            out.writeObject(this);
+
+            // Cerramos el stream
+            out.close();
+
+        } catch(IOException ex){
+            throw new IOException(AutomataExcepcion.SAVE_ERROR);
+        }
+    }
+
+    /**
+     * Método para guardar un archivo
+     */
+    public void guarde00(File archivo) {
         JOptionPane.showMessageDialog(null, AutomataExcepcion.NOT_AVAILABLE);
     }
 
     /**
      * Método para guardar un archivo
      */
-    public void guarde(File archivo) throws IOException{
+    public void guarde01(File archivo) throws IOException{
         try {
             // Creamos el stream
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(archivo.getAbsolutePath()));
@@ -77,16 +125,72 @@ public class AutomataCelular implements Serializable{
     }
 
     /**
-     * Método para guardar un archivo
+     * Método para importar un archivo de texto
      */
-    public void guarde00(File archivo) {
+    public AutomataCelular importe(File archivo) throws IOException, AutomataExcepcion {
+        automata = new Elemento[LONGITUD][LONGITUD];
+        for (int f = 0; f < LONGITUD; f++){
+            for (int c = 0; c < LONGITUD; c++){
+                automata[f][c] = null;
+            }
+        }
+
+        try {
+            BufferedReader bIn = new BufferedReader(new FileReader(archivo.getAbsolutePath()));
+
+            int lines = 0;
+            String line = bIn.readLine();
+
+            try {
+                this.importCell(line);
+
+                lines++;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.getMessage());
+            } catch (AutomataExcepcion ex){
+                throw new AutomataExcepcion("Error en la línea " + lines + ":\n" + ex.getMessage());
+            }
+
+
+
+            while (line != null){
+                line = line.trim();
+
+                // Importamos la célula
+                try {
+                    this.importCell(line);
+
+                    lines++;
+                } catch (NumberFormatException ex) {
+                    throw new NumberFormatException(ex.getMessage());
+                } catch (AutomataExcepcion ex){
+                    throw new AutomataExcepcion("Error en la línea " + lines + ":\n" + ex.getMessage());
+                }
+
+                line = bIn.readLine();
+            }
+
+            bIn.close();
+
+            return this;
+        } catch(FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    /**
+     * Método para importar un objeto
+     */
+    public void importe00(File archivo){
         JOptionPane.showMessageDialog(null, AutomataExcepcion.NOT_AVAILABLE);
     }
 
     /**
      * Método para importar un archivo de texto
      */
-    public AutomataCelular importe(File archivo) throws IOException {
+    public AutomataCelular importe01(File archivo) throws IOException, NumberFormatException {
         automata = new Elemento[LONGITUD][LONGITUD];
         for (int f = 0; f < LONGITUD; f++){
             for (int c = 0; c < LONGITUD; c++){
@@ -100,14 +204,19 @@ public class AutomataCelular implements Serializable{
             int lines = 0;
 
             String line = bIn.readLine();
-            this.importCell(line);
+            try {
+                //this.importCell(line);
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.getMessage());
+            }
+
 
 
             while (line != null){
                 line = line.trim();
 
                 // Importamos la célula
-                this.importCell(line);
+                //this.importCell(line);
 
                 line = bIn.readLine();
             }
@@ -124,10 +233,42 @@ public class AutomataCelular implements Serializable{
     }
 
     /**
-     * Método para importar un objeto
+     * Método para importar un archivo de texto
      */
-    public void importe00(File archivo){
-        JOptionPane.showMessageDialog(null, AutomataExcepcion.NOT_AVAILABLE);
+    public AutomataCelular importe02(File archivo) throws IOException {
+        automata = new Elemento[LONGITUD][LONGITUD];
+        for (int f = 0; f < LONGITUD; f++){
+            for (int c = 0; c < LONGITUD; c++){
+                automata[f][c] = null;
+            }
+        }
+
+        try {
+            BufferedReader bIn = new BufferedReader(new FileReader(archivo.getAbsolutePath()));
+
+            int lines = 0;
+
+            String line = bIn.readLine();
+            //this.importCell(line);
+
+
+            while (line != null){
+                line = line.trim();
+
+                // Importamos la célula
+                //this.importCell(line);
+
+                line = bIn.readLine();
+            }
+
+            bIn.close();
+
+            return this;
+        } catch(FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     /**
@@ -159,25 +300,89 @@ public class AutomataCelular implements Serializable{
     }
 
     /**
+     * Método para exportar un objeto
+     */
+    public void exporte01(File archivo) throws FileNotFoundException {
+        try {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(archivo.getAbsolutePath()));
+
+            for (int f = 0; f < LONGITUD; f++){
+                for (int c = 0; c < LONGITUD; c++){
+                    if (getElemento(f, c).getColor() != Color.white){
+                        pw.println(getElemento(f, c).getClass().toString().replace("class domain.celulas.", "") + " " + f + " " + c);
+                    }
+                }
+            }
+
+            pw.close();
+        } catch (FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        }
+    }
+
+    /**
+     * Método para exportar un objeto
+     */
+    public void exporte02(File archivo) throws FileNotFoundException {
+        try {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(archivo.getAbsolutePath()));
+
+            for (int f = 0; f < LONGITUD; f++){
+                for (int c = 0; c < LONGITUD; c++){
+                    if (getElemento(f, c).getColor() != Color.white){
+                        pw.println(getElemento(f, c).getClass().toString().replace("class domain.celulas.", "") + " " + f + " " + c);
+                    }
+                }
+            }
+
+            pw.close();
+        } catch (FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        }
+    }
+
+
+
+    /**
      * Método para importar una célula
      * @param info Un string con los datos de la célula
      */
-    private void importCell(String info){
-        System.out.println(info);
-        String[] data = info.split("\\s+");
+    private void importCell(String info) throws NumberFormatException, AutomataExcepcion{
+        try {
+            String[] data = info.split("\\s+");
 
-        String name = data[0];
-        int[] pos = new int[]{Integer.parseInt(data[1]), Integer.parseInt(data[2])};
+            String name = data[0];
+            int[] pos = new int[]{Integer.parseInt(data[1]), Integer.parseInt(data[2])};
 
-        System.out.println(Arrays.toString(data));
 
-        switch (name){
-            case "CelulaConway":
-                automata[pos[0]][pos[1]] = new CelulaConway(this, pos[0], pos[1]);
-                break;
-            default:
-                break;
+            // Verificamos que el nombre exista
+            if (!name.equals("CelulaConway")){
+                throw new AutomataExcepcion(AutomataExcepcion.NAME_ERROR);
+            }
+
+            // Verificamos posición en X
+            if (pos[0] < 0 || pos[0] >= LONGITUD){
+                throw new AutomataExcepcion(AutomataExcepcion.X_POS_ERROR);
+            }
+
+            // Verificamos posición en Y
+            if (pos[1] < 0 || pos[1] >= LONGITUD){
+                throw new AutomataExcepcion(AutomataExcepcion.Y_POS_ERROR);
+            }
+
+            System.out.println(Arrays.toString(data));
+
+            switch (name){
+                case "CelulaConway":
+                    automata[pos[0]][pos[1]] = new CelulaConway(this, pos[0], pos[1]);
+                    break;
+                default:
+                    break;
+            }
+        } catch (NumberFormatException ex){
+            throw new NumberFormatException(AutomataExcepcion.FORMAT_ERROR);
         }
+
     }
 
     /**

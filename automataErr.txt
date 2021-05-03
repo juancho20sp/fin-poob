@@ -1,0 +1,8 @@
+NOT_AVAILABLE = "Esta funcionalidad está en construcción";
+ERROR_GENERAL = "Este es un mensaje de error general";
+CLASS_NOT_FOUND = "El archivo que está tratando de abrir no coincide con la clase " +
+            "esperada";
+IO_ERROR = "Error de serialización: \nEl archivo que intenta abrir no corresponde al" +
+            " formato esperado (.dat) o fue creado con una versión antigua del programa";
+SAVE_ERROR = "Ocurrió un error al momento de guardar el archivo, inténtelo nuevamente " +
+            "o pongáse en contacto con el programador";
