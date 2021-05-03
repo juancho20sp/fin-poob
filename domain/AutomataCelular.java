@@ -6,6 +6,8 @@ import domain.excepciones.AutomataExcepcion;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 /**
@@ -127,7 +129,7 @@ public class AutomataCelular implements Serializable{
     /**
      * Método para importar un archivo de texto
      */
-    public AutomataCelular importe(File archivo) throws IOException, AutomataExcepcion {
+    public AutomataCelular importe(File archivo) throws IOException, AutomataExcepcion, ClassNotFoundException, NoSuchMethodException {
         automata = new Elemento[LONGITUD][LONGITUD];
         for (int f = 0; f < LONGITUD; f++){
             for (int c = 0; c < LONGITUD; c++){
@@ -149,7 +151,12 @@ public class AutomataCelular implements Serializable{
                 throw new NumberFormatException(ex.getMessage());
             } catch (AutomataExcepcion ex){
                 throw new AutomataExcepcion("Error en la línea " + lines + ":\n" + ex.getMessage());
-            }
+            } catch(ClassNotFoundException ex){
+            throw new ClassNotFoundException(AutomataExcepcion.NAME_ERROR);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new NoSuchMethodException(AutomataExcepcion.NAME_ERROR);
+        }
 
 
 
@@ -272,6 +279,62 @@ public class AutomataCelular implements Serializable{
     }
 
     /**
+     * Método para importar un archivo de texto
+     */
+    public AutomataCelular importe03(File archivo) throws IOException, AutomataExcepcion {
+        automata = new Elemento[LONGITUD][LONGITUD];
+        for (int f = 0; f < LONGITUD; f++){
+            for (int c = 0; c < LONGITUD; c++){
+                automata[f][c] = null;
+            }
+        }
+
+        try {
+            BufferedReader bIn = new BufferedReader(new FileReader(archivo.getAbsolutePath()));
+
+            int lines = 0;
+            String line = bIn.readLine();
+
+            try {
+                //this.importCell(line);
+
+                lines++;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.getMessage());
+            //} catch (AutomataExcepcion ex){
+                //throw new AutomataExcepcion("Error en la línea " + lines + ":\n" + ex.getMessage());
+            }
+
+
+
+            while (line != null){
+                line = line.trim();
+
+                // Importamos la célula
+                try {
+                    //this.importCell(line);
+
+                    lines++;
+                } catch (NumberFormatException ex) {
+                    throw new NumberFormatException(ex.getMessage());
+                } //catch (AutomataExcepcion ex){
+                    //throw new AutomataExcepcion("Error en la línea " + lines + ":\n" + ex.getMessage());
+                //}
+
+                line = bIn.readLine();
+            }
+
+            bIn.close();
+
+            return this;
+        } catch(FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    /**
      * Método para exportar un objeto
      */
     public void exporte(File archivo) throws FileNotFoundException {
@@ -281,7 +344,7 @@ public class AutomataCelular implements Serializable{
             for (int f = 0; f < LONGITUD; f++){
                 for (int c = 0; c < LONGITUD; c++){
                     if (getElemento(f, c).getColor() != Color.white){
-                        pw.println(getElemento(f, c).getClass().toString().replace("class domain.celulas.", "") + " " + f + " " + c);
+                        pw.println(getElemento(f, c).getClass().toString().replace("class ", "") + " " + f + " " + c);
                     }
                 }
             }
@@ -341,13 +404,81 @@ public class AutomataCelular implements Serializable{
         }
     }
 
+    /**
+     * Método para exportar un objeto
+     */
+    public void exporte03(File archivo) throws FileNotFoundException {
+        try {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(archivo.getAbsolutePath()));
+
+            for (int f = 0; f < LONGITUD; f++){
+                for (int c = 0; c < LONGITUD; c++){
+                    if (getElemento(f, c).getColor() != Color.white){
+                        pw.println(getElemento(f, c).getClass().toString().replace("class domain.celulas.", "") + " " + f + " " + c);
+                    }
+                }
+            }
+
+            pw.close();
+        } catch (FileNotFoundException ex){
+            throw new FileNotFoundException(ex.getMessage());
+        }
+    }
+
 
 
     /**
      * Método para importar una célula
      * @param info Un string con los datos de la célula
      */
-    private void importCell(String info) throws NumberFormatException, AutomataExcepcion{
+    private void importCell(String info) throws NumberFormatException, AutomataExcepcion, ClassNotFoundException, NoSuchMethodException{
+        try {
+            String[] data = info.split("\\s+");
+
+            String name = data[0];
+            int[] pos = new int[]{Integer.parseInt(data[1]), Integer.parseInt(data[2])};
+
+
+            // Verificamos posición en X
+            if (pos[0] < 0 || pos[0] >= LONGITUD){
+                throw new AutomataExcepcion(AutomataExcepcion.X_POS_ERROR);
+            }
+
+            // Verificamos posición en Y
+            if (pos[1] < 0 || pos[1] >= LONGITUD){
+                throw new AutomataExcepcion(AutomataExcepcion.Y_POS_ERROR);
+            }
+
+            System.out.println(Arrays.toString(data));
+
+            // Creamos la célula a partir del nombre
+            Class<?> myClass = Class.forName(name);
+            Constructor<?> myConstructor = myClass.getConstructor(AutomataCelular.class, int.class, int.class);
+            Object obj = myConstructor.newInstance(new Object[] {this, pos[0], pos[1]});
+            automata[pos[0]][pos[1]] = (Elemento)obj;
+
+        } catch (NumberFormatException ex){
+            throw new NumberFormatException(AutomataExcepcion.FORMAT_ERROR);
+        } catch(ClassNotFoundException ex){
+            throw new ClassNotFoundException(AutomataExcepcion.NAME_ERROR);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new NoSuchMethodException(AutomataExcepcion.NAME_ERROR);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Método para importar una célula
+     * @param info Un string con los datos de la célula
+     */
+    private void importCell01(String info) throws NumberFormatException, AutomataExcepcion{
         try {
             String[] data = info.split("\\s+");
 

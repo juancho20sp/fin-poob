@@ -263,6 +263,10 @@ public class AutomataGUI extends JFrame{
                     JOptionPane.showMessageDialog(null, e.getMessage());
                 } catch (AutomataExcepcion e){
                     JOptionPane.showMessageDialog(null, e.getMessage());
+                } catch (NoSuchMethodException e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                } catch (ClassNotFoundException e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
                 }
 
 
