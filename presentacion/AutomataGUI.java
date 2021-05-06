@@ -254,6 +254,8 @@ public class AutomataGUI extends JFrame{
             case JFileChooser.APPROVE_OPTION:
                 File file = chooser.getSelectedFile();
 
+                System.out.println(file.getAbsolutePath());
+
                 try {
                     automata = automata.importe(file);
                     repaint();
